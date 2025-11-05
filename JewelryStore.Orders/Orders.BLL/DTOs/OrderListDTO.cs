@@ -1,5 +1,4 @@
-﻿using System;
-namespace JewelryStore.OrdersService.Orders.BLL.DTOs
+﻿namespace JewelryStore.OrdersService.Orders.BLL.DTOs
 {
 	public class OrderListDTO
 	{
