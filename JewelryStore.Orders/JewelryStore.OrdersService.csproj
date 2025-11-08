@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.1.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.20" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Npgsql" Version="7.0.10" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Orders.Domain\" />
+    <None Remove="Orders.Domain\Entities\" />
+    <None Remove="Orders.Domain\Exceptions\" />
+    <None Remove="Orders.DAL\" />
+    <None Remove="Orders.DAL\Repositories\" />
+    <None Remove="Orders.DAL\Repositories\Interfaces\" />
+    <None Remove="Orders.BLL\" />
+    <None Remove="Orders.BLL\DTOs\" />
+    <None Remove="Orders.DAL\UOW\" />
+    <None Remove="Orders.BLL\Mapper\" />
+    <None Remove="Orders.BLL\Services\" />
+    <None Remove="Orders.BLL\Services\Interfaces\" />
+    <None Remove="Orders.API\" />
+    <None Remove="Orders.API\Middleware\" />
+    <None Remove="Controllers\" />
+    <None Remove="Orders.API\Controllers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Orders.Domain\" />
+    <Folder Include="Orders.Domain\Entities\" />
+    <Folder Include="Orders.Domain\Exceptions\" />
+    <Folder Include="Orders.DAL\" />
+    <Folder Include="Orders.DAL\Repositories\" />
+    <Folder Include="Orders.DAL\Repositories\Interfaces\" />
+    <Folder Include="Orders.BLL\" />
+    <Folder Include="Orders.BLL\DTOs\" />
+    <Folder Include="Orders.DAL\UOW\" />
+    <Folder Include="Orders.BLL\Mapper\" />
+    <Folder Include="Orders.BLL\Services\" />
+    <Folder Include="Orders.BLL\Services\Interfaces\" />
+    <Folder Include="Orders.API\" />
+    <Folder Include="Orders.API\Middleware\" />
+    <Folder Include="Controllers\" />
+    <Folder Include="Orders.API\Controllers\" />
+  </ItemGroup>
+</Project>
