@@ -16,7 +16,7 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             _transaction = transaction;
         }
 
-        public async Task<IEnumerable<OrderItem>> GetByOrderIdAsync(int orderId)
+        public async Task<IEnumerable<OrderItem>> GetByOrderIdAsync(int orderId, CancellationToken ct = default)
         {
             const string sql = @" SELECT 
                     oi.orderitemid, oi.orderid, oi.productid, oi.quantity, oi.unitprice, p.productid, p.name, p.price
@@ -24,12 +24,11 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
                 INNER JOIN products p ON oi.productid = p.productid
                 WHERE oi.orderid = @OrderId;";
 
-            var orderItems = await _connection.QueryAsync<OrderItem, Product, OrderItem>(sql,
-                (orderItem, product) =>
-                { orderItem.Product = product;
-                    return orderItem; },
-                new { OrderId = orderId }, _transaction, splitOn: "productid"
-            );
+            var commandDefinition = new CommandDefinition(sql, new { OrderId = orderId }, _transaction, cancellationToken: ct);
+            var orderItems = await _connection.QueryAsync<OrderItem, Product, OrderItem>(commandDefinition,
+                (orderItem, product) => {orderItem.Product = product;
+                    return orderItem;
+                }, splitOn: "productid");
             return orderItems;
         }
     }

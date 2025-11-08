@@ -4,7 +4,7 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories.Interfaces
 {
 	public interface ICustomerRepository : IGenericRepository<Customer>
     {
-        Task<IEnumerable<Customer>> GetByNameAsync(string? firstName, string? lastName);
+        Task<IEnumerable<Customer>> GetByNameAsync(string? firstName, string? lastName, CancellationToken ct = default);
     }
 }
 

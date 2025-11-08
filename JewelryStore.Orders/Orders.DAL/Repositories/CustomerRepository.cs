@@ -14,16 +14,16 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             _transaction = transaction;
         }
 
-        public override async Task<Customer?> GetByIdAsync(int id)
+        public override async Task<Customer?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             string sql = "SELECT customerid, firstname, lastname, email, phonenumber FROM customers WHERE customerid = @Id;";
 
             await using var command = new NpgsqlCommand(sql, _connection, _transaction);
             command.Parameters.AddWithValue("@Id", id);
 
-            await using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync(ct);
             
-            if (await reader.ReadAsync())
+            if (await reader.ReadAsync(ct))
             {
                 return MapCustomerFromReader(reader);
             }
@@ -31,15 +31,15 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             return null;
         }
 
-        public override async Task<IEnumerable<Customer>> GetAllAsync()
+        public override async Task<IEnumerable<Customer>> GetAllAsync(CancellationToken ct = default)
         {
             string sql = "SELECT customerid, firstname, lastname, email, phonenumber FROM customers;";
 
             await using var command = new NpgsqlCommand(sql, _connection, _transaction);
-            await using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync(ct);
 
             var customers = new List<Customer>();
-            while (await reader.ReadAsync())
+            while (await reader.ReadAsync(ct))
             {
                 customers.Add(MapCustomerFromReader(reader));
             }
@@ -47,7 +47,7 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             return customers;
         }
 
-        public async Task<IEnumerable<Customer>> GetByNameAsync(string? firstName, string? lastName)
+        public async Task<IEnumerable<Customer>> GetByNameAsync(string? firstName, string? lastName, CancellationToken ct = default)
         {
             var conditions = new List<string>();
             var command = new NpgsqlCommand { Connection = _connection, Transaction = _transaction };
@@ -74,10 +74,10 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
 
             await using (command)
             {
-                await using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync(ct);
 
                 var customers = new List<Customer>();
-                while (await reader.ReadAsync())
+                while (await reader.ReadAsync(ct))
                 {
                     customers.Add(MapCustomerFromReader(reader));
                 }
@@ -86,7 +86,7 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             }
         }
 
-        public override async Task<int> CreateAsync(Customer customer)
+        public override async Task<int> CreateAsync(Customer customer, CancellationToken ct = default)
         {
             string sql = @"INSERT INTO customers (firstname, lastname, email, phonenumber)
                            VALUES (@FirstName, @LastName, @Email, @PhoneNumber)
@@ -99,11 +99,11 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             command.Parameters.AddWithValue("@Email", customer.Email);
             command.Parameters.AddWithValue("@PhoneNumber", customer.PhoneNumber ?? (object)DBNull.Value);
 
-            var result = await command.ExecuteScalarAsync();
+            var result = await command.ExecuteScalarAsync(ct);
             return Convert.ToInt32(result);
         }
 
-        public override async Task<bool> UpdateAsync(Customer customer)
+        public override async Task<bool> UpdateAsync(Customer customer, CancellationToken ct = default)
         {
             string sql = @"UPDATE customers 
                            SET firstname = @FirstName,
@@ -120,18 +120,18 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             command.Parameters.AddWithValue("@Email", customer.Email);
             command.Parameters.AddWithValue("@PhoneNumber", customer.PhoneNumber ?? (object)DBNull.Value);
 
-            int affected = await command.ExecuteNonQueryAsync();
+            int affected = await command.ExecuteNonQueryAsync(ct);
             return affected > 0;
         }
 
-        public override async Task<bool> DeleteAsync(int id)
+        public override async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
         {
             string sql = "DELETE FROM customers WHERE customerid = @Id;";
 
             await using var command = new NpgsqlCommand(sql, _connection, _transaction);
             command.Parameters.AddWithValue("@Id", id);
 
-            int affected = await command.ExecuteNonQueryAsync();
+            int affected = await command.ExecuteNonQueryAsync(ct);
             return affected > 0;
         }
 

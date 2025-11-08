@@ -4,6 +4,6 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories.Interfaces
 {
     public interface IOrderItemRepository 
     {
-        Task<IEnumerable<OrderItem>> GetByOrderIdAsync(int orderId);
+        Task<IEnumerable<OrderItem>> GetByOrderIdAsync(int orderId, CancellationToken ct = default);
     }
 }

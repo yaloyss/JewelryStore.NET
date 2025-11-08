@@ -18,13 +18,13 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<OrderDTO> CreateOrderAsync(OrderCreateDTO orderCreateDto)
+        public async Task<OrderDTO> CreateOrderAsync(OrderCreateDTO orderCreateDto, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var customer = await _unitOfWork.Customers.GetByIdAsync(orderCreateDto.CustomerId);
+                var customer = await _unitOfWork.Customers.GetByIdAsync(orderCreateDto.CustomerId, ct);
                 if (customer == null)
                 {
                     throw new NotFoundException($"Customer with id {orderCreateDto.CustomerId} was not found");
@@ -37,7 +37,7 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
 
                 foreach (var itemCreateDto in orderCreateDto.Items)
                 {
-                    var product = await _unitOfWork.Products.GetByIdAsync(itemCreateDto.ProductId);
+                    var product = await _unitOfWork.Products.GetByIdAsync(itemCreateDto.ProductId, ct);
                     if (product == null)
                     {
                         throw new NotFoundException($"Product with id {itemCreateDto.ProductId} was not found");
@@ -52,11 +52,10 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
                 var order = _mapper.Map<Order>(orderCreateDto);
                 order.OrderDate = DateTime.UtcNow;
                 order.Status = string.IsNullOrWhiteSpace(orderCreateDto.Status) ? "Pending" : orderCreateDto.Status;
-
-                int orderId = await _unitOfWork.Orders.CreateAsync(order);
+                int orderId = await _unitOfWork.Orders.CreateAsync(order, ct);
 
                 await _unitOfWork.CommitAsync();
-                return await GetOrderByIdAsync(orderId);
+                return await GetOrderByIdAsync(orderId, ct);
             }
             catch (NotFoundException)
             {
@@ -80,27 +79,26 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
             }
         }
 
-        public async Task<OrderDTO> GetOrderByIdAsync(int orderId)
+        public async Task<OrderDTO> GetOrderByIdAsync(int orderId, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
+                var order = await _unitOfWork.Orders.GetByIdAsync(orderId, ct);
                 if (order == null)
                 {
                     throw new NotFoundException($"Order with id {orderId} was not found");
                 }
 
-                var customer = await _unitOfWork.Customers.GetByIdAsync(order.CustomerId);
+                var customer = await _unitOfWork.Customers.GetByIdAsync(order.CustomerId, ct);
                 if (customer != null)
                 {
                     order.Customer = customer;
                 }
 
-                var orderItems = await _unitOfWork.OrderItems.GetByOrderIdAsync(orderId);
+                var orderItems = await _unitOfWork.OrderItems.GetByOrderIdAsync(orderId, ct);
                 order.Items = orderItems.ToList();
-
                 await _unitOfWork.CommitAsync();
 
                 var orderDto = _mapper.Map<OrderDTO>(order);
@@ -118,26 +116,24 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
             }
         }
 
-        public async Task<IEnumerable<OrderListDTO>> GetAllOrdersAsync()
+        public async Task<IEnumerable<OrderListDTO>> GetAllOrdersAsync(CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
-
-                var orders = await _unitOfWork.Orders.GetAllAsync();
+                var orders = await _unitOfWork.Orders.GetAllAsync(ct);
                 var orderListDtos = new List<OrderListDTO>();
 
                 foreach (var order in orders)
                 {
-                    var customer = await _unitOfWork.Customers.GetByIdAsync(order.CustomerId);
+                    var customer = await _unitOfWork.Customers.GetByIdAsync(order.CustomerId, ct);
                     if (customer != null)
                     {
                         order.Customer = customer;
                     }
 
-                    var items = await _unitOfWork.OrderItems.GetByOrderIdAsync(order.OrderId);
+                    var items = await _unitOfWork.OrderItems.GetByOrderIdAsync(order.OrderId, ct);
                     order.Items = items.ToList();
-
                     var orderListDto = _mapper.Map<OrderListDTO>(order);
                     orderListDtos.Add(orderListDto);
                 }
@@ -152,7 +148,7 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
             }
         }
 
-        public async Task<IEnumerable<OrderListDTO>> GetOrdersByCustomerNameAsync(string firstName, string lastName)
+        public async Task<IEnumerable<OrderListDTO>> GetOrdersByCustomerNameAsync(string firstName, string lastName, CancellationToken ct = default)
         {
             try
             {
@@ -163,30 +159,25 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
                     throw new ValidationException("First name or last name must be provided");
                 }
 
-                var customers = await _unitOfWork.Customers.GetByNameAsync(firstName, lastName);
+                var customers = await _unitOfWork.Customers.GetByNameAsync(firstName, lastName, ct);
                 if (customers == null || !customers.Any())
                 {
                     throw new NotFoundException($"Customer with name '{firstName} {lastName}' was not found");
                 }
 
                 var orderListDtos = new List<OrderListDTO>();
-
                 foreach (var customer in customers)
                 {
-                    var orders = await _unitOfWork.Orders.GetByCustomerIdAsync(customer.CustomerId);
-
+                    var orders = await _unitOfWork.Orders.GetByCustomerIdAsync(customer.CustomerId, ct);
                     foreach (var order in orders)
                     {
                         order.Customer = customer;
-
-                        var items = await _unitOfWork.OrderItems.GetByOrderIdAsync(order.OrderId);
+                        var items = await _unitOfWork.OrderItems.GetByOrderIdAsync(order.OrderId, ct);
                         order.Items = items.ToList();
-
                         var orderListDto = _mapper.Map<OrderListDTO>(order);
                         orderListDtos.Add(orderListDto);
                     }
                 }
-
                 await _unitOfWork.CommitAsync();
                 return orderListDtos;
             }
@@ -207,13 +198,13 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
             }
         }
 
-        public async Task<OrderDTO> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDTO statusUpdateDto)
+        public async Task<OrderDTO> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDTO statusUpdateDto, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
+                var order = await _unitOfWork.Orders.GetByIdAsync(orderId, ct);
                 if (order == null)
                 {
                     throw new NotFoundException($"Order with id {orderId} was not found");
@@ -225,9 +216,9 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
                 }
 
                 order.Status = statusUpdateDto.Status;
-                await _unitOfWork.Orders.UpdateAsync(order);
+                await _unitOfWork.Orders.UpdateAsync(order, ct);
                 await _unitOfWork.CommitAsync();
-                return await GetOrderByIdAsync(orderId);
+                return await GetOrderByIdAsync(orderId, ct);
             }
             catch (NotFoundException)
             {
@@ -251,25 +242,25 @@ namespace JewelryStore.OrdersService.Orders.Application.Services
             }
         }
 
-        public async Task<bool> DeleteOrderAsync(int orderId)
+        public async Task<bool> DeleteOrderAsync(int orderId, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
+                var order = await _unitOfWork.Orders.GetByIdAsync(orderId, ct);
                 if (order == null)
                 {
                     throw new NotFoundException($"Order with id {orderId} was not found");
                 }
 
-                // business rule -- can only delete pending/cancelled orders
+                //can only delete pending/cancelled orders
                 if (order.Status == "Processing" || order.Status == "Completed")
                 {
                     throw new BusinessConflictException($"Cannot delete order with status '{order.Status}'. Only Pending or Cancelled orders can be deleted.");
                 }
 
-                await _unitOfWork.Orders.DeleteAsync(orderId);
+                await _unitOfWork.Orders.DeleteAsync(orderId, ct);
                 await _unitOfWork.CommitAsync();
                 return true;
             }

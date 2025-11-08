@@ -18,13 +18,13 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<CustomerDTO> GetCustomerByIdAsync(int customerId)
+        public async Task<CustomerDTO> GetCustomerByIdAsync(int customerId, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+                var customer = await _unitOfWork.Customers.GetByIdAsync(customerId, ct);
                 if (customer == null)
                 {
                     throw new NotFoundException($"Customer with ID {customerId} not found");
@@ -45,7 +45,7 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             }
         }
 
-        public async Task<IEnumerable<CustomerDTO>> GetCustomersByNameAsync(string? firstName, string? lastName)
+        public async Task<IEnumerable<CustomerDTO>> GetCustomersByNameAsync(string? firstName, string? lastName, CancellationToken ct = default)
         {
             try
             {
@@ -56,8 +56,7 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
                     throw new ValidationException("First name or last name must be provided");
                 }
 
-                var customers = await _unitOfWork.Customers.GetByNameAsync(firstName, lastName);
-
+                var customers = await _unitOfWork.Customers.GetByNameAsync(firstName, lastName, ct);
                 if (customers == null || !customers.Any())
                 {
                     throw new NotFoundException($"No customers found with name '{firstName} {lastName}'");
@@ -83,7 +82,7 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             }
         }
 
-        public async Task<int> CreateCustomerAsync(CustomerDTO customerDto)
+        public async Task<int> CreateCustomerAsync(CustomerDTO customerDto, CancellationToken ct = default)
         {
             try
             {
@@ -91,11 +90,9 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
 
                 ValidateCustomer(customerDto);
 
-                // Маппінг DTO -> Entity
+                //DTO -> Entity
                 var customer = _mapper.Map<Customer>(customerDto);
-
-                // Створення клієнта
-                var customerId = await _unitOfWork.Customers.CreateAsync(customer);
+                var customerId = await _unitOfWork.Customers.CreateAsync(customer, ct);
 
                 await _unitOfWork.CommitAsync();
                 return customerId;
@@ -112,23 +109,21 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             }
         }
 
-        public async Task<bool> UpdateCustomerAsync(CustomerDTO customerDto)
+        public async Task<bool> UpdateCustomerAsync(CustomerDTO customerDto, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
                 ValidateCustomer(customerDto);
 
-                var existingCustomer = await _unitOfWork.Customers.GetByIdAsync(customerDto.CustomerId);
+                var existingCustomer = await _unitOfWork.Customers.GetByIdAsync(customerDto.CustomerId, ct);
                 if (existingCustomer == null)
                 {
                     throw new NotFoundException($"Customer with ID {customerDto.CustomerId} not found");
                 }
 
                 var customer = _mapper.Map<Customer>(customerDto);
-
-                var result = await _unitOfWork.Customers.UpdateAsync(customer);
-
+                var result = await _unitOfWork.Customers.UpdateAsync(customer, ct);
                 await _unitOfWork.CommitAsync();
                 return result;
             }
@@ -149,19 +144,19 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             }
         }
 
-        public async Task<bool> DeleteCustomerAsync(int customerId)
+        public async Task<bool> DeleteCustomerAsync(int customerId, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+                var customer = await _unitOfWork.Customers.GetByIdAsync(customerId, ct);
                 if (customer == null)
                 {
                     throw new NotFoundException($"Customer with ID {customerId} not found");
                 }
 
-                var result = await _unitOfWork.Customers.DeleteAsync(customerId);
+                var result = await _unitOfWork.Customers.DeleteAsync(customerId, ct);
                 await _unitOfWork.CommitAsync();
                 return result;
             }

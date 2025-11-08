@@ -1,13 +1,12 @@
-﻿using System;
-namespace JewelryStore.OrdersService.Orders.DAL.Repositories.Interfaces
+﻿namespace JewelryStore.OrdersService.Orders.DAL.Repositories.Interfaces
 {
 	public interface IGenericRepository<T> 
 	{
-        Task<IEnumerable<T>> GetAllAsync();
-        Task<T?> GetByIdAsync(int id);
-        Task<int> CreateAsync(T entity);
-        Task<bool> UpdateAsync(T entity);
-        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<T>> GetAllAsync(CancellationToken ct = default);
+        Task<T?> GetByIdAsync(int id, CancellationToken ct = default);
+        Task<int> CreateAsync(T entity, CancellationToken ct = default);
+        Task<bool> UpdateAsync(T entity, CancellationToken ct = default);
+        Task<bool> DeleteAsync(int id, CancellationToken ct = default);
     }
 }
 

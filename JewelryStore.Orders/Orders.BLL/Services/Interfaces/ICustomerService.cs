@@ -4,10 +4,10 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services.Interfaces
 {
     public interface ICustomerService
     {
-        Task<CustomerDTO> GetCustomerByIdAsync(int customerId);
-        Task<IEnumerable<CustomerDTO>> GetCustomersByNameAsync(string? firstName, string? lastName);
-        Task<int> CreateCustomerAsync(CustomerDTO customerDto);
-        Task<bool> UpdateCustomerAsync(CustomerDTO customerDto);
-        Task<bool> DeleteCustomerAsync(int customerId);
+        Task<CustomerDTO> GetCustomerByIdAsync(int customerId, CancellationToken ct = default);
+        Task<IEnumerable<CustomerDTO>> GetCustomersByNameAsync(string? firstName, string? lastName, CancellationToken ct = default);
+        Task<int> CreateCustomerAsync(CustomerDTO customerDto, CancellationToken ct = default);
+        Task<bool> UpdateCustomerAsync(CustomerDTO customerDto, CancellationToken ct = default);
+        Task<bool> DeleteCustomerAsync(int customerId, CancellationToken ct = default);
     }
 }

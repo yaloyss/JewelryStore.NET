@@ -16,16 +16,17 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             _transaction = transaction;
         }
 
-        public async Task<int> CreateAsync(Order order)
+        public async Task<int> CreateAsync(Order order, CancellationToken ct = default)
         {
             string sql = @"INSERT INTO orders (customerid, status, orderdate)
                            VALUES (@CustomerId, @Status, @OrderDate)
                            RETURNING orderid;";
 
-            return await _connection.ExecuteScalarAsync<int>(sql, order, _transaction);
+            var commandDefinition = new CommandDefinition(sql, order, _transaction, cancellationToken: ct);
+            return await _connection.ExecuteScalarAsync<int>(commandDefinition);
         }
 
-        public async Task<bool> UpdateAsync(Order order)
+        public async Task<bool> UpdateAsync(Order order, CancellationToken ct = default)
         {
             string sql = @"UPDATE orders 
                            SET customerid = @CustomerId,
@@ -33,30 +34,34 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
                                orderdate = @OrderDate
                            WHERE orderid = @OrderId;";
 
-            int affected = await _connection.ExecuteAsync(sql, order, _transaction);
+            var commandDefinition = new CommandDefinition(sql, order, _transaction, cancellationToken: ct);
+            int affected = await _connection.ExecuteAsync(commandDefinition);
             return affected > 0;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
         {
             string sql = "DELETE FROM orders WHERE orderid = @Id;";
-            int affected = await _connection.ExecuteAsync(sql, new { Id = id }, _transaction);
+             var commandDefinition = new CommandDefinition(sql, new { Id = id }, _transaction, cancellationToken: ct);
+            int affected = await _connection.ExecuteAsync(commandDefinition);
             return affected > 0;
         }
 
-        public async Task<Order?> GetByIdAsync(int id)
+        public async Task<Order?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             string sql = "SELECT orderid, customerid, status, orderdate FROM orders WHERE orderid = @Id;";
-            return await _connection.QuerySingleOrDefaultAsync<Order>(sql, new { Id = id }, _transaction);
+            var commandDefinition = new CommandDefinition(sql, new { Id = id }, _transaction, cancellationToken: ct);
+            return await _connection.QuerySingleOrDefaultAsync<Order>(commandDefinition);
         }
 
-        public async Task<IEnumerable<Order>> GetAllAsync()
+        public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken ct = default)
         {
             string sql = "SELECT orderid, customerid, status, orderdate FROM orders ORDER BY orderdate DESC;";
-            return await _connection.QueryAsync<Order>(sql, transaction: _transaction);
+            var commandDefinition = new CommandDefinition(sql, transaction: _transaction, cancellationToken: ct);
+            return await _connection.QueryAsync<Order>(commandDefinition);
         }
 
-        public async Task<IEnumerable<Order>> GetByCustomerIdAsync(int customerId)
+        public async Task<IEnumerable<Order>> GetByCustomerIdAsync(int customerId, CancellationToken ct = default)
         {
             string sql = @"SELECT 
                     o.orderid, o.customerid, o.status, o.orderdate, c.customerid, c.firstname, c.lastname, c.email, c.phonenumber
@@ -65,16 +70,15 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
                 WHERE o.customerid = @CustomerId 
                 ORDER BY o.orderdate DESC;";
 
-            var orders = await _connection.QueryAsync<Order, Customer, Order>( sql,
-                (order, customer) =>
-                { order.Customer = customer;
-                    return order; },
-                new { CustomerId = customerId }, _transaction, splitOn: "customerid"
-            );
+            var commandDefinition = new CommandDefinition(sql, new { CustomerId = customerId }, _transaction, cancellationToken: ct);
+            var orders = await _connection.QueryAsync<Order, Customer, Order>(commandDefinition,
+                (order, customer) => {order.Customer = customer;
+                    return order;
+                }, splitOn: "customerid");
             return orders;
         }
 
-        public async Task<IEnumerable<Order>> GetByStatusAsync(string status)
+        public async Task<IEnumerable<Order>> GetByStatusAsync(string status, CancellationToken ct = default)
         {
             string sql = @"SELECT 
                     o.orderid, o.customerid, o.status, o.orderdate, c.customerid, c.firstname, c.lastname, c.email, c.phonenumber
@@ -83,12 +87,11 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
                 WHERE o.status = @Status 
                 ORDER BY o.orderdate DESC;";
 
-            var orders = await _connection.QueryAsync<Order, Customer, Order>(sql,
-                (order, customer) =>
-                { order.Customer = customer;
-                    return order; },
-                new { Status = status }, _transaction, splitOn: "customerid"
-            );
+            var commandDefinition = new CommandDefinition(sql, new { Status = status }, _transaction, cancellationToken: ct);
+            var orders = await _connection.QueryAsync<Order, Customer, Order>(commandDefinition,
+                (order, customer) => {order.Customer = customer;
+                    return order;
+                }, splitOn: "customerid");
             return orders;
         }
     }

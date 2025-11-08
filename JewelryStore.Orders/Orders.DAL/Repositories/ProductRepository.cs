@@ -16,10 +16,11 @@ namespace JewelryStore.OrdersService.Orders.DAL.Repositories
             _transaction = transaction;
         }
 
-        public async Task<Product?> GetByIdAsync(int id)
+        public async Task<Product?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             string sql = "SELECT productid, name, price FROM products WHERE productid = @Id;";
-            return await _connection.QuerySingleOrDefaultAsync<Product>(sql, new { Id = id }, _transaction);
+            var commandDefinition = new CommandDefinition(sql, new { Id = id }, _transaction, cancellationToken: ct);
+            return await _connection.QuerySingleOrDefaultAsync<Product>(commandDefinition);
         }
     }
 }

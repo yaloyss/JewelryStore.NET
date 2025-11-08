@@ -17,20 +17,19 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<ProductDTO> GetProductByIdAsync(int productId)
+        public async Task<ProductDTO> GetProductByIdAsync(int productId, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var product = await _unitOfWork.Products.GetByIdAsync(productId);
+                var product = await _unitOfWork.Products.GetByIdAsync(productId, ct);
                 if (product == null)
                 {
                     throw new NotFoundException($"Product with ID {productId} not found");
                 }
 
                 await _unitOfWork.CommitAsync();
-
                 return _mapper.Map<ProductDTO>(product);
             }
             catch (NotFoundException)
@@ -45,13 +44,13 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             }
         }
 
-        public async Task<bool> IsProductAvailableAsync(int productId)
+        public async Task<bool> IsProductAvailableAsync(int productId, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var product = await _unitOfWork.Products.GetByIdAsync(productId);
+                var product = await _unitOfWork.Products.GetByIdAsync(productId, ct);
 
                 await _unitOfWork.CommitAsync();
 

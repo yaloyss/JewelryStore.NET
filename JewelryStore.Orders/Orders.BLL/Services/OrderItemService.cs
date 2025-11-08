@@ -17,17 +17,17 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<OrderItemDTO> GetOrderItemByIdAsync(int id)
+        public async Task<OrderItemDTO> GetOrderItemByIdAsync(int id, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var allOrders = await _unitOfWork.Orders.GetAllAsync();
+                var allOrders = await _unitOfWork.Orders.GetAllAsync(ct);
 
                 foreach (var order in allOrders)
                 {
-                    var orderItems = await _unitOfWork.OrderItems.GetByOrderIdAsync(order.OrderId);
+                    var orderItems = await _unitOfWork.OrderItems.GetByOrderIdAsync(order.OrderId, ct);
                     var item = orderItems.FirstOrDefault(oi => oi.OrderItemId == id);
 
                     if (item != null)
@@ -51,18 +51,18 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             }
         }
 
-        public async Task<IEnumerable<OrderItemDTO>> GetAllOrderItemsAsync()
+        public async Task<IEnumerable<OrderItemDTO>> GetAllOrderItemsAsync(CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var allOrders = await _unitOfWork.Orders.GetAllAsync();
+                var allOrders = await _unitOfWork.Orders.GetAllAsync(ct);
                 var allOrderItems = new List<OrderItemDTO>();
 
                 foreach (var order in allOrders)
                 {
-                    var orderItems = await _unitOfWork.OrderItems.GetByOrderIdAsync(order.OrderId);
+                    var orderItems = await _unitOfWork.OrderItems.GetByOrderIdAsync(order.OrderId, ct);
                     var mappedItems = _mapper.Map<IEnumerable<OrderItemDTO>>(orderItems);
                     allOrderItems.AddRange(mappedItems);
                 }
@@ -77,13 +77,13 @@ namespace JewelryStore.OrdersService.Orders.BLL.Services
             }
         }
 
-        public async Task<IEnumerable<OrderItemDTO>> GetOrderItemsByOrderIdAsync(int orderId)
+        public async Task<IEnumerable<OrderItemDTO>> GetOrderItemsByOrderIdAsync(int orderId, CancellationToken ct = default)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var items = await _unitOfWork.OrderItems.GetByOrderIdAsync(orderId);
+                var items = await _unitOfWork.OrderItems.GetByOrderIdAsync(orderId, ct);
 
                 await _unitOfWork.CommitAsync();
                 return _mapper.Map<IEnumerable<OrderItemDTO>>(items);
