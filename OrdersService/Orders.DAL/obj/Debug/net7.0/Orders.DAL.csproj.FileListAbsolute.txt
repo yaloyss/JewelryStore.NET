@@ -1,0 +1,15 @@
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/bin/Debug/net7.0/Orders.DAL.deps.json
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/bin/Debug/net7.0/Orders.DAL.dll
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/bin/Debug/net7.0/Orders.DAL.pdb
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/bin/Debug/net7.0/Orders.Domain.dll
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/bin/Debug/net7.0/Orders.Domain.pdb
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/Orders.DAL.csproj.AssemblyReference.cache
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/Orders.DAL.GeneratedMSBuildEditorConfig.editorconfig
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/Orders.DAL.AssemblyInfoInputs.cache
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/Orders.DAL.AssemblyInfo.cs
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/Orders.DAL.csproj.CoreCompileInputs.cache
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/Orders.DAL.csproj.CopyComplete
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/Orders.DAL.dll
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/refint/Orders.DAL.dll
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/Orders.DAL.pdb
+/Users/user/Projects/JewelryStore.NET/OrdersService/Orders.DAL/obj/Debug/net7.0/ref/Orders.DAL.dll
