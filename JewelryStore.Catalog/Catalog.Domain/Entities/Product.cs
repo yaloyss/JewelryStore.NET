@@ -1,4 +1,4 @@
-﻿namespace JewelryStore.CatalogService.CatalogDomain.Entities
+﻿namespace JewelryStore.CatalogService.Catalog.Domain.Entities
 {
 	public class Product
 	{
@@ -18,9 +18,9 @@
 
         public int CategoryId { get; set; }
 
-        public Metal metal { get; set; } 
-        public Category category { get; set; } 
-        public ICollection<ProductStone>? ProductStone { get; set; } = null!;
+        public Metal Metal { get; set; } 
+        public Category Category { get; set; } 
+        public ICollection<ProductStone>? ProductStones { get; set; } = null!;
     }
 }
 

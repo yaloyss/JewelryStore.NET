@@ -1,4 +1,4 @@
-﻿namespace JewelryStore.CatalogService.CatalogDomain.Entities
+﻿namespace JewelryStore.CatalogService.Catalog.Domain.Entities
 {
     public class Stone
 	{
