@@ -17,6 +17,10 @@ namespace Catalog.DAL.Configuration
             builder.Property(c => c.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
 
             builder.HasIndex(c => c.Name);
+
+            builder.HasMany(c => c.Products)
+                 .WithOne(p => p.Category)
+                 .HasForeignKey(p => p.CategoryId);
         }
     }
 }

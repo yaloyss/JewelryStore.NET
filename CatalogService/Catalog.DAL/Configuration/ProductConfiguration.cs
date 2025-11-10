@@ -33,17 +33,14 @@ namespace Catalog.DAL.Configuration
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_products_metals");
 
-            builder.HasOne(p => p.Category).WithMany()
+            builder.HasOne(p => p.Category).WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_products_categories");
 
             builder.HasIndex(p => p.Name).HasDatabaseName("idx_product_name");
-
             builder.HasIndex(p => p.Price).HasDatabaseName("idx_product_price");
-
             builder.HasIndex(p => p.MetalId).HasDatabaseName("idx_product_metal");
-
             builder.HasIndex(p => p.CategoryId).HasDatabaseName("idx_product_category");
         }
     }
