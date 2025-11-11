@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Exceptions\" />
+    <None Remove="DTOs\" />
+    <None Remove="DTOs\Category\" />
+    <None Remove="DTOs\Metal\" />
+    <None Remove="DTOs\Stone\" />
+    <None Remove="DTOs\Product\" />
+    <None Remove="DTOs\ProductStone\" />
+    <None Remove="Mapper\" />
+    <None Remove="Services\" />
+    <None Remove="Services\Interfaces\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="DTOs\Category\" />
+    <Folder Include="DTOs\Metal\" />
+    <Folder Include="DTOs\Stone\" />
+    <Folder Include="DTOs\Product\" />
+    <Folder Include="DTOs\ProductStone\" />
+    <Folder Include="Mapper\" />
+    <Folder Include="Services\" />
+    <Folder Include="Services\Interfaces\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Catalog.DAL\Catalog.DAL.csproj" />
+  </ItemGroup>
+</Project>
