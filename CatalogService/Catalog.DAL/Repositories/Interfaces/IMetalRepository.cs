@@ -4,7 +4,7 @@ namespace Catalog.DAL.Repositories.Interfaces
 {
     public interface IMetalRepository : IGenericRepository<Metal>
     {
-        Task<Metal?> GetMetalByNameAsync(string name);
+        Task<Metal?> GetMetalByNameAsync(string name, CancellationToken cancellationToken = default);
     }
 }
 

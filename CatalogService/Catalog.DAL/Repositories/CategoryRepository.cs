@@ -10,21 +10,21 @@ namespace Catalog.DAL.Repositories
     {
         public CategoryRepository(CatalogDbContext context) : base(context) { }
 
-        public async Task<Category?> GetCategoryByIdAsync(int categoryId)
+        public async Task<Category?> GetCategoryByIdAsync(int categoryId, CancellationToken cancellationToken = default)
         {
-            var category = await _dbSet.FindAsync(categoryId);
+            var category = await _dbSet.FindAsync(new object[] { categoryId }, cancellationToken);
             if (category != null)
             {
                 await _context.Entry(category)
                     .Collection(c => c.Products)
-                    .LoadAsync();
+                    .LoadAsync(cancellationToken);
             }
             return category;
         }
 
-        public async Task<IEnumerable<Product>> GetProductsForCategoryAsync(int categoryId)
+        public async Task<IEnumerable<Product>> GetProductsForCategoryAsync(int categoryId, CancellationToken cancellationToken = default)
         {
-            var category = await _dbSet.FindAsync(categoryId);
+            var category = await _dbSet.FindAsync(new object[] { categoryId }, cancellationToken);
             if (category == null)
             {
                 return Enumerable.Empty<Product>();
@@ -34,29 +34,28 @@ namespace Catalog.DAL.Repositories
                 .Collection(c => c.Products)
                 .Query()
                 .Include(p => p.Metal)
-                .LoadAsync();
+                .LoadAsync(cancellationToken);
 
             return category.Products ?? Enumerable.Empty<Product>();
         }
 
-        public async Task<int> GetProductCountByCategoryAsync(int categoryId)
+        public async Task<int> GetProductCountByCategoryAsync(int categoryId, CancellationToken cancellationToken = default)
         {
-            var category = await _dbSet.FindAsync(categoryId);
+            var category = await _dbSet.FindAsync(new object[] { categoryId }, cancellationToken);
             if (category == null)
             {
                 return 0;
             }
 
-            //explicit Loading with counting
             return await _context.Entry(category)
                 .Collection(c => c.Products)
                 .Query()
-                .CountAsync();
+                .CountAsync(cancellationToken);
         }
 
-        public async Task<Dictionary<string, int>> GetCategoryStatisticsAsync(int categoryId)
+        public async Task<Dictionary<string, int>> GetCategoryStatisticsAsync(int categoryId, CancellationToken cancellationToken = default)
         {
-            var category = await _dbSet.FindAsync(categoryId);
+            var category = await _dbSet.FindAsync(new object[] { categoryId }, cancellationToken);
             if (category == null)
             {
                 return new Dictionary<string, int>();
@@ -65,19 +64,19 @@ namespace Catalog.DAL.Repositories
             var totalProducts = await _context.Entry(category)
                 .Collection(c => c.Products)
                 .Query()
-                .CountAsync();
+                .CountAsync(cancellationToken);
 
             var goldenProducts = await _context.Entry(category)
                 .Collection(c => c.Products)
                 .Query()
                 .Where(p => p.Metal.Name.Contains("Gold"))
-                .CountAsync();
+                .CountAsync(cancellationToken);
 
             var silverProducts = await _context.Entry(category)
                 .Collection(c => c.Products)
                 .Query()
                 .Where(p => p.Metal.Name.Contains("Silver"))
-                .CountAsync();
+                .CountAsync(cancellationToken);
 
             return new Dictionary<string, int>
             {

@@ -4,13 +4,13 @@ namespace Catalog.DAL.Repositories.Interfaces
 {
     public interface IProductStoneRepository : IGenericRepository<ProductStone>
     {
-        Task<IEnumerable<ProductStone>> GetProductStonesWithDetailsAsync(int productId);
-        Task<IEnumerable<Product>> GetProductsByStoneAsync(int stoneId);
-        Task<IEnumerable<Stone>> GetProductStonesAsync(int productId);
-        Task<bool> AddStoneToProductAsync(int productId, int stoneId);
-        Task<bool> RemoveStoneFromProductAsync(int productId, int stoneId);
-        Task<IEnumerable<ProductStone>> GetProductsWithMultipleStonesAsync();
-        Task<IEnumerable<Product>> GetProductsByStoneNamesAsync(List<string> stoneNames);
+        Task<IEnumerable<ProductStone>> GetProductStonesWithDetailsAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetProductsByStoneAsync(int stoneId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Stone>> GetProductStonesAsync(int productId, CancellationToken cancellationToken = default);
+        Task<bool> AddStoneToProductAsync(int productId, int stoneId, CancellationToken cancellationToken = default);
+        Task<bool> RemoveStoneFromProductAsync(int productId, int stoneId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductStone>> GetProductsWithMultipleStonesAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetProductsByStoneNamesAsync(List<string> stoneNames, CancellationToken cancellationToken = default);
     }
 }
 

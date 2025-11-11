@@ -10,10 +10,10 @@ namespace Catalog.DAL.Repositories
         public MetalRepository(CatalogDbContext context) : base(context) { }
 
 
-        public async Task<Metal?> GetMetalByNameAsync(string name)
+        public async Task<Metal?> GetMetalByNameAsync(string name, CancellationToken cancellationToken = default)
         {
             return await _dbSet
-                .FirstOrDefaultAsync(m => m.Name == name);
+                .FirstOrDefaultAsync(m => m.Name == name, cancellationToken);
         }
     }
 }
