@@ -16,7 +16,7 @@ namespace Catalog.DAL.Configuration
 
             builder.Property(s => s.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
 
-            builder.HasIndex(s => s.Name).IsUnique();
+            builder.HasIndex(s => s.Name);
         }
     }
 }

@@ -20,18 +20,18 @@ namespace Catalog.DAL.Configuration
 
             builder.Property(p => p.Weight).HasColumnName("weight").HasColumnType("numeric(10,2)").IsRequired();
 
-            builder.Property(p => p.Size).HasColumnName("size").HasColumnType("numeric(10,2)").IsRequired();
+            builder.Property(p => p.Size).HasColumnName("size").HasColumnType("numeric(10,2)").IsRequired(false);
 
             builder.Property(p => p.Manufacturer).HasColumnName("manufacturer").HasMaxLength(100);
 
-            builder.Property(p => p.MetalId).HasColumnName("metalid").IsRequired();
+            builder.Property(p => p.MetalId).HasColumnName("metalid").IsRequired(false);
 
             builder.Property(p => p.CategoryId).HasColumnName("categoryid").IsRequired();
 
-            builder.HasOne(p => p.Metal).WithMany()
+            builder.HasOne(p => p.Metal).WithMany(m => m.Products)
                 .HasForeignKey(p => p.MetalId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("fk_products_metals");
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("fk_products_metals").IsRequired(false);
 
             builder.HasOne(p => p.Category).WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
@@ -40,7 +40,6 @@ namespace Catalog.DAL.Configuration
 
             builder.HasIndex(p => p.Name).HasDatabaseName("idx_product_name");
             builder.HasIndex(p => p.Price).HasDatabaseName("idx_product_price");
-            builder.HasIndex(p => p.MetalId).HasDatabaseName("idx_product_metal");
             builder.HasIndex(p => p.CategoryId).HasDatabaseName("idx_product_category");
         }
     }

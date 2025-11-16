@@ -6,8 +6,8 @@
 
         public int StoneId { get; set; }
 
-		public Product Product { get; set; }
-        public Stone Stone { get; set; }
+		public Product Product { get; set; } = null!;
+        public Stone Stone { get; set; } = null!;
     }
 }
 

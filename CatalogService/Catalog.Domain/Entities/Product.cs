@@ -18,9 +18,9 @@
 
         public int CategoryId { get; set; }
 
-        public Metal Metal { get; set; } 
-        public Category Category { get; set; } 
-        public ICollection<ProductStone>? ProductStones { get; set; } = null!;
+        public Metal? Metal { get; set; } 
+        public Category Category { get; set; } = null!; 
+        public ICollection<ProductStone>? ProductStones { get; set; } 
     }
 }
 

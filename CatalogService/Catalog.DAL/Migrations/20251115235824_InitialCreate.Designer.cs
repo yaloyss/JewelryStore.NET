@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Catalog.DAL.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20251110203934_InitialCreate")]
+    [Migration("20251115235824_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -58,6 +58,7 @@ namespace Catalog.DAL.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MetalId"));
 
                     b.Property<string>("Color")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("color");
@@ -71,8 +72,7 @@ namespace Catalog.DAL.Migrations
                     b.HasKey("MetalId")
                         .HasName("metals_pkey");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("Name");
 
                     b.ToTable("metals", (string)null);
                 });
@@ -96,7 +96,6 @@ namespace Catalog.DAL.Migrations
                         .HasColumnName("manufacturer");
 
                     b.Property<int?>("MetalId")
-                        .IsRequired()
                         .HasColumnType("integer")
                         .HasColumnName("metalid");
 
@@ -111,7 +110,6 @@ namespace Catalog.DAL.Migrations
                         .HasColumnName("price");
 
                     b.Property<decimal?>("Size")
-                        .IsRequired()
                         .HasColumnType("numeric(10,2)")
                         .HasColumnName("size");
 
@@ -125,8 +123,7 @@ namespace Catalog.DAL.Migrations
                     b.HasIndex("CategoryId")
                         .HasDatabaseName("idx_product_category");
 
-                    b.HasIndex("MetalId")
-                        .HasDatabaseName("idx_product_metal");
+                    b.HasIndex("MetalId");
 
                     b.HasIndex("Name")
                         .HasDatabaseName("idx_product_name");
@@ -173,8 +170,7 @@ namespace Catalog.DAL.Migrations
                     b.HasKey("StoneId")
                         .HasName("stones_pkey");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("Name");
 
                     b.ToTable("stones", (string)null);
                 });
@@ -189,10 +185,9 @@ namespace Catalog.DAL.Migrations
                         .HasConstraintName("fk_products_categories");
 
                     b.HasOne("Catalog.Domain.Entities.Metal", "Metal")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("MetalId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
+                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_products_metals");
 
                     b.Navigation("Category");
@@ -210,7 +205,7 @@ namespace Catalog.DAL.Migrations
                         .HasConstraintName("fk_productstone_products");
 
                     b.HasOne("Catalog.Domain.Entities.Stone", "Stone")
-                        .WithMany()
+                        .WithMany("ProductStones")
                         .HasForeignKey("StoneId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -226,7 +221,17 @@ namespace Catalog.DAL.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("Catalog.Domain.Entities.Metal", b =>
+                {
+                    b.Navigation("Products");
+                });
+
             modelBuilder.Entity("Catalog.Domain.Entities.Product", b =>
+                {
+                    b.Navigation("ProductStones");
+                });
+
+            modelBuilder.Entity("Catalog.Domain.Entities.Stone", b =>
                 {
                     b.Navigation("ProductStones");
                 });

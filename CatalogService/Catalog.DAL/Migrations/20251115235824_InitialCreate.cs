@@ -31,7 +31,7 @@ namespace Catalog.DAL.Migrations
                     metalid = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    color = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
+                    color = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,9 +60,9 @@ namespace Catalog.DAL.Migrations
                     name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     weight = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    size = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    size = table.Column<decimal>(type: "numeric(10,2)", nullable: true),
                     manufacturer = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    metalid = table.Column<int>(type: "integer", nullable: false),
+                    metalid = table.Column<int>(type: "integer", nullable: true),
                     categoryid = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -79,7 +79,7 @@ namespace Catalog.DAL.Migrations
                         column: x => x.metalid,
                         principalTable: "metals",
                         principalColumn: "metalid",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -114,8 +114,7 @@ namespace Catalog.DAL.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_metals_name",
                 table: "metals",
-                column: "name",
-                unique: true);
+                column: "name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_product_stone_stoneid",
@@ -128,11 +127,6 @@ namespace Catalog.DAL.Migrations
                 column: "categoryid");
 
             migrationBuilder.CreateIndex(
-                name: "idx_product_metal",
-                table: "products",
-                column: "metalid");
-
-            migrationBuilder.CreateIndex(
                 name: "idx_product_name",
                 table: "products",
                 column: "name");
@@ -143,10 +137,14 @@ namespace Catalog.DAL.Migrations
                 column: "price");
 
             migrationBuilder.CreateIndex(
+                name: "IX_products_metalid",
+                table: "products",
+                column: "metalid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_stones_name",
                 table: "stones",
-                column: "name",
-                unique: true);
+                column: "name");
         }
 
         /// <inheritdoc />

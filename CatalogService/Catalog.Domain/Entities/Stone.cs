@@ -5,6 +5,8 @@
         public int StoneId { get; set; }
 
         public string Name { get; set; } = null!;
+
+        public ICollection<ProductStone> ProductStones { get; set; } = new List<ProductStone>();
     }
 }
 

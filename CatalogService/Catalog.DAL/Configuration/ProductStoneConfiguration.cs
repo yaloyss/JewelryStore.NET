@@ -21,7 +21,7 @@ namespace Catalog.DAL.Configuration
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_productstone_products");
 
-            builder.HasOne(ps => ps.Stone).WithMany()
+            builder.HasOne(ps => ps.Stone).WithMany(s => s.ProductStones)
                 .HasForeignKey(ps => ps.StoneId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_productstone_stones");
