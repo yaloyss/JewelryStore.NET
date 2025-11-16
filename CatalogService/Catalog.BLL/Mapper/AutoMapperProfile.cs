@@ -8,9 +8,9 @@ using Catalog.Domain.Entities;
 
 namespace Catalog.BLL.Mapper
 {
-	public class AutoMapper : Profile
+	public class AutoMapperProfile : Profile
 	{
-		public AutoMapper()
+		public AutoMapperProfile()
 		{
             CreateMap<Category, CategoryDTO>();
             CreateMap<CreateCategoryDTO, Category>();

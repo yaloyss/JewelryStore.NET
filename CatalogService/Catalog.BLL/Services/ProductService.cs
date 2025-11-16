@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Catalog.BLL.DTOs.Product;
-using Catalog.BLL.DTOs.ProductStone;
 using Catalog.BLL.DTOs.Stone;
 using Catalog.BLL.Exceptions;
 using Catalog.BLL.Services.Interfaces;
@@ -19,6 +18,7 @@ namespace Catalog.BLL.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+
 
         public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync(CancellationToken cancellationToken = default)
         {
@@ -56,6 +56,118 @@ namespace Catalog.BLL.Services
             }
 
             return _mapper.Map<ProductDetailedInfoDTO>(product);
+        }
+
+        public async Task<ProductDTO> CreateProductAsync(CreateProductDTO dto, CancellationToken cancellationToken = default)
+        {
+            //validation
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                throw new ValidationException("Product name cannot be empty.");
+            }
+
+            if (dto.Price <= 0)
+            {
+                throw new ValidationException("Product price must be greater than 0.");
+            }
+
+            if (dto.Weight <= 0)
+            {
+                throw new ValidationException("Product weight must be greater than 0.");
+            }
+
+            if (dto.Size.HasValue && dto.Size.Value <= 0)
+            {
+                throw new ValidationException("Product size must be greater than 0.");
+            }
+
+            var category = await _unitOfWork.Categories.GetByIdAsync(dto.CategoryId, cancellationToken);
+            if (category == null)
+            {
+                throw new NotFoundException($"Category with ID {dto.CategoryId} not found.");
+            }
+
+            if (dto.MetalId.HasValue)
+            {
+                var metal = await _unitOfWork.Metals.GetByIdAsync(dto.MetalId.Value, cancellationToken);
+                if (metal == null)
+                {
+                    throw new NotFoundException($"Metal with ID {dto.MetalId.Value} not found.");
+                }
+            }
+
+            if (dto.StoneIds != null && dto.StoneIds.Any())
+            {
+                foreach (var stoneId in dto.StoneIds)
+                {
+                    var stone = await _unitOfWork.Stones.GetByIdAsync(stoneId, cancellationToken);
+                    if (stone == null)
+                    {
+                        throw new NotFoundException($"Stone with ID {stoneId} not found.");
+                    }
+                }
+            }
+
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync(cancellationToken);
+                var product = _mapper.Map<Product>(dto);
+                await _unitOfWork.Products.AddAsync(product, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                if (dto.StoneIds != null && dto.StoneIds.Any())
+                {
+                    foreach (var stoneId in dto.StoneIds)
+                    {
+                        await _unitOfWork.ProductStones.AddStoneToProductAsync(product.ProductId, stoneId, cancellationToken);
+                    }
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                }
+
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+                return _mapper.Map<ProductDTO>(product);
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                throw new Exception("An error occurred while creating the product.", ex);
+            }
+        }
+
+        public async Task DeleteProductAsync(int productId, CancellationToken cancellationToken = default)
+        {
+            if (productId <= 0)
+            {
+                throw new ValidationException("ProductId must be greater than 0.");
+            }
+
+            var product = await _unitOfWork.Products.GetByIdAsync(productId, cancellationToken);
+            if (product == null)
+            {
+                throw new NotFoundException($"Product with ID {productId} not found.");
+            }
+
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+                //first deleting all relations with stones
+                var stones = await _unitOfWork.ProductStones.GetProductStonesAsync(productId, cancellationToken);
+                foreach (var stone in stones)
+                {
+                    await _unitOfWork.ProductStones.RemoveStoneFromProductAsync(productId, stone.StoneId, cancellationToken);
+                }
+
+                //then deleting a product
+                _unitOfWork.Products.Delete(product);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                throw new Exception("An error occurred while deleting the product.", ex);
+            }
         }
 
         public async Task<IEnumerable<ProductDTO>> GetProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken = default)
@@ -113,92 +225,66 @@ namespace Catalog.BLL.Services
                 priceRange.MinPrice,
                 priceRange.MaxPrice,
                 cancellationToken);
+
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
 
-        public async Task<ProductDTO> CreateProductAsync(CreateProductDTO dto, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ProductDTO>> GetProductsByStoneNamesAsync(List<string> stoneNames, CancellationToken cancellationToken = default)
         {
-            //validation
-            if (string.IsNullOrWhiteSpace(dto.Name))
+            if (stoneNames == null || !stoneNames.Any())
             {
-                throw new ValidationException("Product name cannot be empty.");
+                throw new ValidationException("Stone names list cannot be empty.");
             }
 
-            if (dto.Price <= 0)
+            foreach (var stoneName in stoneNames)
             {
-                throw new ValidationException("Product price must be greater than 0.");
-            }
-
-            if (dto.Weight <= 0)
-            {
-                throw new ValidationException("Product weight must be greater than 0.");
-            }
-
-            if (dto.Size.HasValue && dto.Size.Value <= 0)
-            {
-                throw new ValidationException("Product size must be greater than 0.");
-            }
-
-            var category = await _unitOfWork.Categories.GetByIdAsync(dto.CategoryId, cancellationToken);
-            if (category == null)
-            {
-                throw new NotFoundException($"Category with ID {dto.CategoryId} not found.");
-            }
-
-            if (dto.MetalId.HasValue)
-            {
-                var metal = await _unitOfWork.Metals.GetByIdAsync(dto.MetalId.Value, cancellationToken);
-                if (metal == null)
+                var stone = await _unitOfWork.Stones.GetStoneByNameAsync(stoneName, cancellationToken);
+                if (stone == null)
                 {
-                    throw new NotFoundException($"Metal with ID {dto.MetalId.Value} not found.");
+                    throw new NotFoundException($"Stone with name '{stoneName}' not found.");
                 }
             }
 
-            if (dto.StoneIds != null && dto.StoneIds.Any())
-            {
-                foreach (var stoneId in dto.StoneIds)
-                {
-                    var stone = await _unitOfWork.Stones.GetByIdAsync(stoneId, cancellationToken);
-                    if (stone == null)
-                    {
-                        throw new NotFoundException($"Stone with ID {stoneId} not found.");
-                    }
-                }
-            }
-
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
-                var product = _mapper.Map<Product>(dto);
-                await _unitOfWork.Products.AddAsync(product, cancellationToken);
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-                // Додаємо камені до продукту
-                if (dto.StoneIds != null && dto.StoneIds.Any())
-                {
-                    foreach (var stoneId in dto.StoneIds)
-                    {
-                        await _unitOfWork.ProductStones.AddStoneToProductAsync(product.ProductId, stoneId, cancellationToken);
-                    }
-                    await _unitOfWork.SaveChangesAsync(cancellationToken);
-                }
-
-                await _unitOfWork.CommitTransactionAsync(cancellationToken);
-                return _mapper.Map<ProductDTO>(product);
-            }
-            catch (Exception ex)
-            {
-                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                throw new Exception("An error occurred while creating the product.", ex);
-            }
+            var products = await _unitOfWork.ProductStones.GetProductsByStoneNamesAsync(stoneNames, cancellationToken);
+            return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
 
-        public async Task DeleteProductAsync(int productId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ProductDetailedInfoDTO>> GetProductsWithMultipleStonesAsync(CancellationToken cancellationToken = default)
+        {
+            var productStones = await _unitOfWork.ProductStones.GetProductsWithMultipleStonesAsync(cancellationToken);
+
+            //group by ProductId to get unique products
+            var uniqueProducts = productStones.GroupBy(ps => ps.ProductId).Select(g => g.First().Product).ToList();
+            return _mapper.Map<IEnumerable<ProductDetailedInfoDTO>>(uniqueProducts);
+        }
+
+        public async Task<IEnumerable<StoneDTO>> GetProductStonesAsync(int productId, CancellationToken cancellationToken = default)
         {
             if (productId <= 0)
             {
                 throw new ValidationException("ProductId must be greater than 0.");
+            }
+
+            var productExists = await _unitOfWork.Products.GetByIdAsync(productId, cancellationToken);
+            if (productExists == null)
+            {
+                throw new NotFoundException($"Product with ID {productId} not found.");
+            }
+
+            var stones = await _unitOfWork.ProductStones.GetProductStonesAsync(productId, cancellationToken);
+            return _mapper.Map<IEnumerable<StoneDTO>>(stones);
+        }
+
+        public async Task AddStoneToProductAsync(int productId, int stoneId, CancellationToken cancellationToken = default)
+        {
+            if (productId <= 0)
+            {
+                throw new ValidationException("ProductId must be greater than 0.");
+            }
+
+            if (stoneId <= 0)
+            {
+                throw new ValidationException("StoneId must be greater than 0.");
             }
 
             var product = await _unitOfWork.Products.GetByIdAsync(productId, cancellationToken);
@@ -207,65 +293,21 @@ namespace Catalog.BLL.Services
                 throw new NotFoundException($"Product with ID {productId} not found.");
             }
 
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
-                //removing relations with stones
-                var stones = await _unitOfWork.ProductStones.GetProductStonesAsync(productId, cancellationToken);
-                foreach (var stone in stones)
-                {
-                    await _unitOfWork.ProductStones.RemoveStoneFromProductAsync(productId, stone.StoneId, cancellationToken);
-                }
-
-                //and now deleting the product
-                _unitOfWork.Products.Delete(product);
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-                await _unitOfWork.CommitTransactionAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                throw new Exception("An error occurred while deleting the product.", ex);
-            }
-        }
-
-        public async Task<bool> AddStoneToProductAsync(AddingStoneToProductDTO dto, CancellationToken cancellationToken = default)
-        {
-            if (dto.ProductId <= 0)
-            {
-                throw new ValidationException("ProductId must be greater than 0.");
-            }
-
-            if (dto.StoneId <= 0)
-            {
-                throw new ValidationException("StoneId must be greater than 0.");
-            }
-
-            var product = await _unitOfWork.Products.GetByIdAsync(dto.ProductId, cancellationToken);
-            if (product == null)
-            {
-                throw new NotFoundException($"Product with ID {dto.ProductId} not found.");
-            }
-
-            var stone = await _unitOfWork.Stones.GetByIdAsync(dto.StoneId, cancellationToken);
+            var stone = await _unitOfWork.Stones.GetByIdAsync(stoneId, cancellationToken);
             if (stone == null)
             {
-                throw new NotFoundException($"Stone with ID {dto.StoneId} not found.");
+                throw new NotFoundException($"Stone with ID {stoneId} not found.");
             }
 
             try
             {
-                var result = await _unitOfWork.ProductStones.AddStoneToProductAsync(dto.ProductId, dto.StoneId, cancellationToken);
-
+                var result = await _unitOfWork.ProductStones.AddStoneToProductAsync(productId, stoneId, cancellationToken);
                 if (!result)
                 {
                     throw new BusinessConflictException($"Stone '{stone.Name}' is already added to this product.");
                 }
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
-                return true;
             }
             catch (BusinessConflictException)
             {
@@ -277,7 +319,7 @@ namespace Catalog.BLL.Services
             }
         }
 
-        public async Task<bool> RemoveStoneFromProductAsync(int productId, int stoneId, CancellationToken cancellationToken = default)
+        public async Task RemoveStoneFromProductAsync(int productId, int stoneId, CancellationToken cancellationToken = default)
         {
             if (productId <= 0)
             {
@@ -298,14 +340,12 @@ namespace Catalog.BLL.Services
             try
             {
                 var result = await _unitOfWork.ProductStones.RemoveStoneFromProductAsync(productId, stoneId, cancellationToken);
-
                 if (!result)
                 {
                     throw new NotFoundException($"Stone with ID {stoneId} is not associated with product ID {productId}.");
                 }
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
-                return true;
             }
             catch (NotFoundException)
             {
@@ -317,21 +357,5 @@ namespace Catalog.BLL.Services
             }
         }
 
-        public async Task<IEnumerable<StoneDTO>> GetProductStonesAsync(int productId, CancellationToken cancellationToken = default)
-        {
-            if (productId <= 0)
-            {
-                throw new ValidationException("ProductId must be greater than 0.");
-            }
-
-            var productExists = await _unitOfWork.Products.GetByIdAsync(productId, cancellationToken);
-            if (productExists == null)
-            {
-                throw new NotFoundException($"Product with ID {productId} not found.");
-            }
-            var stones = await _unitOfWork.ProductStones.GetProductStonesAsync(productId, cancellationToken);
-            return _mapper.Map<IEnumerable<StoneDTO>>(stones);
-        }
     }
 }
-
