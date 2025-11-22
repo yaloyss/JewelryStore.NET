@@ -60,27 +60,6 @@ namespace Catalog.BLL.Services
 
         public async Task<ProductDTO> CreateProductAsync(CreateProductDTO dto, CancellationToken cancellationToken = default)
         {
-            //validation
-            if (string.IsNullOrWhiteSpace(dto.Name))
-            {
-                throw new ValidationException("Product name cannot be empty.");
-            }
-
-            if (dto.Price <= 0)
-            {
-                throw new ValidationException("Product price must be greater than 0.");
-            }
-
-            if (dto.Weight <= 0)
-            {
-                throw new ValidationException("Product weight must be greater than 0.");
-            }
-
-            if (dto.Size.HasValue && dto.Size.Value <= 0)
-            {
-                throw new ValidationException("Product size must be greater than 0.");
-            }
-
             var category = await _unitOfWork.Categories.GetByIdAsync(dto.CategoryId, cancellationToken);
             if (category == null)
             {
@@ -123,7 +102,6 @@ namespace Catalog.BLL.Services
                     }
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
                 }
-
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
                 return _mapper.Map<ProductDTO>(product);
             }
@@ -206,36 +184,17 @@ namespace Catalog.BLL.Services
 
         public async Task<IEnumerable<ProductDTO>> GetProductsWithPriceRangeAsync(ProductPriceRangeDTO priceRange, CancellationToken cancellationToken = default)
         {
-            if (priceRange.MinPrice < 0)
-            {
-                throw new ValidationException("MinPrice cannot be negative.");
-            }
-
-            if (priceRange.MaxPrice < 0)
-            {
-                throw new ValidationException("MaxPrice cannot be negative.");
-            }
-
             if (priceRange.MinPrice > priceRange.MaxPrice)
             {
                 throw new ValidationException("MinPrice cannot be greater than MaxPrice.");
             }
 
-            var products = await _unitOfWork.Products.GetProductsWithPriceRangeAsync(
-                priceRange.MinPrice,
-                priceRange.MaxPrice,
-                cancellationToken);
-
+            var products = await _unitOfWork.Products.GetProductsWithPriceRangeAsync(priceRange.MinPrice, priceRange.MaxPrice, cancellationToken);
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
 
         public async Task<IEnumerable<ProductDTO>> GetProductsByStoneNamesAsync(List<string> stoneNames, CancellationToken cancellationToken = default)
         {
-            if (stoneNames == null || !stoneNames.Any())
-            {
-                throw new ValidationException("Stone names list cannot be empty.");
-            }
-
             foreach (var stoneName in stoneNames)
             {
                 var stone = await _unitOfWork.Stones.GetStoneByNameAsync(stoneName, cancellationToken);
@@ -244,7 +203,6 @@ namespace Catalog.BLL.Services
                     throw new NotFoundException($"Stone with name '{stoneName}' not found.");
                 }
             }
-
             var products = await _unitOfWork.ProductStones.GetProductsByStoneNamesAsync(stoneNames, cancellationToken);
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
@@ -252,8 +210,7 @@ namespace Catalog.BLL.Services
         public async Task<IEnumerable<ProductDetailedInfoDTO>> GetProductsWithMultipleStonesAsync(CancellationToken cancellationToken = default)
         {
             var productStones = await _unitOfWork.ProductStones.GetProductsWithMultipleStonesAsync(cancellationToken);
-
-            //group by ProductId to get unique products
+            //grouping to get unique products
             var uniqueProducts = productStones.GroupBy(ps => ps.ProductId).Select(g => g.First().Product).ToList();
             return _mapper.Map<IEnumerable<ProductDetailedInfoDTO>>(uniqueProducts);
         }
@@ -264,13 +221,11 @@ namespace Catalog.BLL.Services
             {
                 throw new ValidationException("ProductId must be greater than 0.");
             }
-
             var productExists = await _unitOfWork.Products.GetByIdAsync(productId, cancellationToken);
             if (productExists == null)
             {
                 throw new NotFoundException($"Product with ID {productId} not found.");
             }
-
             var stones = await _unitOfWork.ProductStones.GetProductStonesAsync(productId, cancellationToken);
             return _mapper.Map<IEnumerable<StoneDTO>>(stones);
         }

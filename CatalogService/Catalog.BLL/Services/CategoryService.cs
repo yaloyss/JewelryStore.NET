@@ -70,31 +70,19 @@ namespace Catalog.BLL.Services
                 throw new NotFoundException($"Category with ID {categoryId} not found.");
             }
 
-            var statistics = await _unitOfWork.Categories.GetCategoryStatisticsAsync(categoryId, cancellationToken);
+            var categoryStatistics = await _unitOfWork.Categories.GetCategoryStatisticsAsync(categoryId, cancellationToken);
 
             return new CategoryStatisticsDTO
             {
-                CategoryId = categoryId,
-                Name = category.Name,
-                TotalProducts = statistics.GetValueOrDefault("TotalProducts", 0),
-                GoldenProducts = statistics.GetValueOrDefault("GoldenProducts", 0),
-                SilverProducts = statistics.GetValueOrDefault("SilverProducts", 0)
+                CategoryId = categoryId, Name = category.Name,
+                TotalProducts = categoryStatistics.GetValueOrDefault("TotalProducts", 0),
+                GoldenProducts = categoryStatistics.GetValueOrDefault("GoldenProducts", 0),
+                SilverProducts = categoryStatistics.GetValueOrDefault("SilverProducts", 0)
             };
         }
 
         public async Task<CategoryDTO> CreateCategoryAsync(CreateCategoryDTO dto, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(dto.Name))
-            {
-                throw new ValidationException("Category name cannot be empty.");
-            }
-
-            if (dto.Name.Length > 100)
-            {
-                throw new ValidationException("Category name cannot exceed 100 characters.");
-            }
-
-            //if it has a duplicate
             var existingCategories = await _unitOfWork.Categories.GetAllAsync(cancellationToken);
             if (existingCategories.Any(c => c.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)))
             {
@@ -106,7 +94,6 @@ namespace Catalog.BLL.Services
                 var category = _mapper.Map<Category>(dto);
                 await _unitOfWork.Categories.AddAsync(category, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
-
                 return _mapper.Map<CategoryDTO>(category);
             }
             catch (Exception ex)

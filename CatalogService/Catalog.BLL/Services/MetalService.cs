@@ -56,22 +56,6 @@ namespace Catalog.BLL.Services
 
         public async Task<MetalDTO> CreateMetalAsync(CreateMetalDTO dto, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(dto.Name))
-            {
-                throw new ValidationException("Metal name cannot be empty.");
-            }
-
-            if (dto.Name.Length > 50)
-            {
-                throw new ValidationException("Metal name cannot exceed 50 characters.");
-            }
-
-            if (dto.Color != null && dto.Color.Length > 30)
-            {
-                throw new ValidationException("Metal color cannot exceed 30 characters.");
-            }
-
-            //if it has a duplicate
             var existingMetal = await _unitOfWork.Metals.GetMetalByNameAsync(dto.Name, cancellationToken);
             if (existingMetal != null)
             {

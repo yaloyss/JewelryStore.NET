@@ -56,17 +56,6 @@ namespace Catalog.BLL.Services
 
         public async Task<StoneDTO> CreateStoneAsync(CreateStoneDTO dto, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(dto.Name))
-            {
-                throw new ValidationException("Stone name cannot be empty.");
-            }
-
-            if (dto.Name.Length > 50)
-            {
-                throw new ValidationException("Stone name cannot exceed 50 characters.");
-            }
-
-            //if it has a duplicate
             var existingStone = await _unitOfWork.Stones.GetStoneByNameAsync(dto.Name, cancellationToken);
             if (existingStone != null)
             {
@@ -78,7 +67,6 @@ namespace Catalog.BLL.Services
                 var stone = _mapper.Map<Stone>(dto);
                 await _unitOfWork.Stones.AddAsync(stone, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
-
                 return _mapper.Map<StoneDTO>(stone);
             }
             catch (Exception ex)
