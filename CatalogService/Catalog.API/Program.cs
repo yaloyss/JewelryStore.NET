@@ -1,13 +1,31 @@
-﻿using Catalog.DAL.Data;
+﻿using Catalog.API.Middleware;
+using Catalog.BLL.Mapper;
+using Catalog.BLL.Services;
+using Catalog.BLL.Services.Interfaces;
+using Catalog.BLL.Validators;
+using Catalog.DAL.Data;
+using Catalog.DAL.Sorting;
+using Catalog.DAL.UOW;
+using Catalog.Domain.Entities;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("CatalogDb")));
 
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IMetalService, MetalService>();
+builder.Services.AddScoped<IStoneService, StoneService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+builder.Services.AddScoped<ISorting<Product>, Sorting<Product>>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDTOValidator>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -23,6 +41,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -30,6 +49,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandler>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -37,4 +57,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
