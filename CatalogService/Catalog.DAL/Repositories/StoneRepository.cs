@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Catalog.DAL.Data;
+﻿using Catalog.DAL.Data;
 using Catalog.DAL.Repositories.Interfaces;
 using Catalog.Domain.Entities;
 using Microsoft.EntityFrameworkCore;

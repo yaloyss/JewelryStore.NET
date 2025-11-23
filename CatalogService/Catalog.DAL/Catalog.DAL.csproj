@@ -11,12 +11,18 @@
     <None Remove="Data\" />
     <None Remove="Repositories\" />
     <None Remove="UOW\" />
+    <None Remove="Specifications\" />
+    <None Remove="Pagination\" />
+    <None Remove="Sorting\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\" />
     <Folder Include="Data\" />
     <Folder Include="Repositories\" />
     <Folder Include="UOW\" />
+    <Folder Include="Specifications\" />
+    <Folder Include="Pagination\" />
+    <Folder Include="Sorting\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
@@ -32,5 +38,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.18" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.0" />
+    <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,6 @@
-﻿using Catalog.DAL.Data;
+﻿using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
+using Catalog.DAL.Data;
 using Catalog.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,6 +46,24 @@ namespace Catalog.DAL.Repositories
         public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        //spec. pattern methods
+        public IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> specification)
+        {
+            if (specification == null) throw new ArgumentNullException(nameof(specification));
+            var evaluator = new SpecificationEvaluator();
+            return evaluator.GetQuery(_dbSet.AsQueryable(), specification).AsSplitQuery();
+        }
+
+        public async Task<TEntity?> GetEntityWithSpec(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
+        {
+            return await ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<TEntity>> ListAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
+        {
+            return await ApplySpecification(specification).ToListAsync(cancellationToken);
         }
     }
 }

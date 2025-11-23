@@ -1,4 +1,6 @@
-﻿namespace Catalog.DAL.Repositories.Interfaces
+﻿using Ardalis.Specification;
+
+namespace Catalog.DAL.Repositories.Interfaces
 {
     public interface IGenericRepository<TEntity> where TEntity : class
     {
@@ -8,6 +10,10 @@
         void Update(TEntity entity);
         void Delete(TEntity entity);
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+        IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> specification);
+        Task<TEntity?> GetEntityWithSpec(ISpecification<TEntity> specification, CancellationToken cancellationToken = default);
+        Task<IEnumerable<TEntity>> ListAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default);
     }
 }
 

@@ -8,8 +8,10 @@
 
   <ItemGroup>
     <None Remove="Entities\" />
+    <None Remove="Entities\Parameters\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Entities\" />
+    <Folder Include="Entities\Parameters\" />
   </ItemGroup>
 </Project>

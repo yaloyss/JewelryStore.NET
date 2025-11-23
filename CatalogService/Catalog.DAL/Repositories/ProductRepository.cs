@@ -1,6 +1,11 @@
-﻿using Catalog.DAL.Data;
+﻿using Ardalis.Specification.EntityFrameworkCore;
+using Catalog.DAL.Data;
+using Catalog.DAL.Pagination;
 using Catalog.DAL.Repositories.Interfaces;
+using Catalog.DAL.Sorting;
+using Catalog.DAL.Specifications;
 using Catalog.Domain.Entities;
+using Catalog.Domain.Entities.Parameters;
 using Microsoft.EntityFrameworkCore;
 
 namespace Catalog.DAL.Repositories
@@ -19,32 +24,12 @@ namespace Catalog.DAL.Repositories
                 .FirstOrDefaultAsync(p => p.ProductId == productId, cancellationToken);
         }
 
-        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken = default)
+        public async Task<PagedList<Product>> GetProductsPagedAsync(ProductParameters parameters, ISorting<Product>? sortHelper = null, CancellationToken cancellationToken = default)
         {
-            return await _dbSet
-                .Include(p => p.Metal)
-                .Include(p => p.Category)
-                .Where(p => p.CategoryId == categoryId)
-                .ToListAsync(cancellationToken);
-        }
+            var specification = new ProductWithFiltersSpecification(parameters);
+            var query = _dbSet.WithSpecification(specification).ApplySorting(parameters.OrderBy, sortHelper);
 
-        public async Task<IEnumerable<Product>> GetProductsByMetalAsync(int metalId, CancellationToken cancellationToken = default)
-        {
-            return await _dbSet
-                .Include(p => p.Metal)
-                .Include(p => p.Category)
-                .Where(p => p.MetalId == metalId)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<IEnumerable<Product>> GetProductsWithPriceRangeAsync(decimal minPrice, decimal maxPrice, CancellationToken cancellationToken = default)
-        {
-            return await _dbSet
-                .Include(p => p.Metal)
-                .Include(p => p.Category)
-                .Where(p => p.Price >= minPrice && p.Price <= maxPrice)
-                .OrderBy(p => p.Price)
-                .ToListAsync(cancellationToken);
+            return await PagedList<Product>.ToPagedListAsync(query, parameters, cancellationToken);
         }
     }
 }
