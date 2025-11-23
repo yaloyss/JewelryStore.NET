@@ -1,16 +1,15 @@
 ﻿using Catalog.BLL.DTOs.Product;
 using Catalog.BLL.DTOs.Stone;
+using Catalog.DAL.Pagination;
+using Catalog.Domain.Entities.Parameters;
 
 namespace Catalog.BLL.Services.Interfaces
 {
 	public interface IProductService
 	{
-        Task<IEnumerable<ProductDTO>> GetAllProductsAsync(CancellationToken cancellationToken = default);
         Task<ProductDTO> GetProductByIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<PagedResponse<ProductDTO>> GetProductsPagedAsync(ProductParameters parameters, CancellationToken cancellationToken = default);
         Task<ProductDetailedInfoDTO> GetProductWithDetailsAsync(int productId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<ProductDTO>> GetProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<ProductDTO>> GetProductsByMetalAsync(int metalId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<ProductDTO>> GetProductsWithPriceRangeAsync(ProductPriceRangeDTO priceRange, CancellationToken cancellationToken = default);
         Task<ProductDTO> CreateProductAsync(CreateProductDTO dto, CancellationToken cancellationToken = default);
         Task DeleteProductAsync(int productId, CancellationToken cancellationToken = default);
 

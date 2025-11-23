@@ -4,6 +4,7 @@ using Catalog.BLL.Exceptions;
 using Catalog.BLL.Services.Interfaces;
 using Catalog.DAL.UOW;
 using Catalog.Domain.Entities;
+using Catalog.Domain.Entities.Parameters;
 
 namespace Catalog.BLL.Services
 {
@@ -89,10 +90,16 @@ namespace Catalog.BLL.Services
                 throw new NotFoundException($"Metal with ID {metalId} not found.");
             }
 
-            var products = await _unitOfWork.Products.GetProductsByMetalAsync(metalId, cancellationToken);
-            if (products.Any())
+            var parameters = new ProductParameters
             {
-                throw new BusinessConflictException($"Cannot delete metal '{metal.Name}' because it is used in {products.Count()} product(s).");
+                MetalId = metalId,
+                PageSize = 1
+            };
+            var products = await _unitOfWork.Products.GetProductsPagedAsync(parameters, null, cancellationToken);
+
+            if (products.TotalCount > 0)
+            {
+                throw new BusinessConflictException($"Cannot delete metal '{metal.Name}' because it is used in {products.TotalCount} product(s).");
             }
 
             try

@@ -5,6 +5,9 @@ using Catalog.BLL.Exceptions;
 using Catalog.BLL.Services.Interfaces;
 using Catalog.DAL.UOW;
 using Catalog.Domain.Entities;
+using Catalog.Domain.Entities.Parameters;
+using Catalog.DAL.Pagination;
+using Catalog.DAL.Sorting;
 
 namespace Catalog.BLL.Services
 {
@@ -19,11 +22,18 @@ namespace Catalog.BLL.Services
             _mapper = mapper;
         }
 
-
-        public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync(CancellationToken cancellationToken = default)
+        public async Task<PagedResponse<ProductDTO>> GetProductsPagedAsync(ProductParameters parameters, CancellationToken cancellationToken = default)
         {
-            var products = await _unitOfWork.Products.GetAllAsync(cancellationToken);
-            return _mapper.Map<IEnumerable<ProductDTO>>(products);
+            if (parameters.MinPrice.HasValue && parameters.MaxPrice.HasValue
+                && parameters.MinPrice > parameters.MaxPrice)
+            {
+                throw new ValidationException("MinPrice cannot be greater than MaxPrice.");
+            }
+
+            var pagedProducts = await _unitOfWork.Products.GetProductsPagedAsync(parameters, cancellationToken : cancellationToken);
+            var productDtos = _mapper.Map<List<ProductDTO>>(pagedProducts.ToList());
+
+            return PagedResponse<ProductDTO>.FromPagedList(pagedProducts, productDtos);
         }
 
         public async Task<ProductDTO> GetProductByIdAsync(int productId, CancellationToken cancellationToken = default)
@@ -148,51 +158,6 @@ namespace Catalog.BLL.Services
             }
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken = default)
-        {
-            if (categoryId <= 0)
-            {
-                throw new ValidationException("CategoryId must be greater than 0.");
-            }
-
-            var categoryExists = await _unitOfWork.Categories.GetByIdAsync(categoryId, cancellationToken);
-            if (categoryExists == null)
-            {
-                throw new NotFoundException($"Category with ID {categoryId} not found.");
-            }
-
-            var products = await _unitOfWork.Products.GetProductsByCategoryAsync(categoryId, cancellationToken);
-            return _mapper.Map<IEnumerable<ProductDTO>>(products);
-        }
-
-        public async Task<IEnumerable<ProductDTO>> GetProductsByMetalAsync(int metalId, CancellationToken cancellationToken = default)
-        {
-            if (metalId <= 0)
-            {
-                throw new ValidationException("MetalId must be greater than 0.");
-            }
-
-            var metalExists = await _unitOfWork.Metals.GetByIdAsync(metalId, cancellationToken);
-            if (metalExists == null)
-            {
-                throw new NotFoundException($"Metal with ID {metalId} not found.");
-            }
-
-            var products = await _unitOfWork.Products.GetProductsByMetalAsync(metalId, cancellationToken);
-            return _mapper.Map<IEnumerable<ProductDTO>>(products);
-        }
-
-        public async Task<IEnumerable<ProductDTO>> GetProductsWithPriceRangeAsync(ProductPriceRangeDTO priceRange, CancellationToken cancellationToken = default)
-        {
-            if (priceRange.MinPrice > priceRange.MaxPrice)
-            {
-                throw new ValidationException("MinPrice cannot be greater than MaxPrice.");
-            }
-
-            var products = await _unitOfWork.Products.GetProductsWithPriceRangeAsync(priceRange.MinPrice, priceRange.MaxPrice, cancellationToken);
-            return _mapper.Map<IEnumerable<ProductDTO>>(products);
-        }
-
         public async Task<IEnumerable<ProductDTO>> GetProductsByStoneNamesAsync(List<string> stoneNames, CancellationToken cancellationToken = default)
         {
             foreach (var stoneName in stoneNames)
@@ -311,6 +276,5 @@ namespace Catalog.BLL.Services
                 throw new Exception("An error occurred while removing stone from product.", ex);
             }
         }
-
     }
 }

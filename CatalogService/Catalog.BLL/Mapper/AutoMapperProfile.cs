@@ -2,7 +2,6 @@
 using Catalog.BLL.DTOs.Category;
 using Catalog.BLL.DTOs.Metal;
 using Catalog.BLL.DTOs.Product;
-using Catalog.BLL.DTOs.ProductStone;
 using Catalog.BLL.DTOs.Stone;
 using Catalog.Domain.Entities;
 
@@ -39,8 +38,6 @@ namespace Catalog.BLL.Mapper
 
             CreateMap<Product, ProductDetailedInfoDTO>()
                 .ForMember(dest => dest.Stones, opt => opt.MapFrom(src => src.ProductStones != null ? src.ProductStones.Select(ps => ps.Stone).ToList() : new List<Stone>()));
-
-            CreateMap<ProductStone, ProductStoneDTO>();
         }
 	}
 }
