@@ -1,4 +1,5 @@
-﻿using Catalog.API.Middleware;
+﻿using System;
+using Catalog.API.Middleware;
 using Catalog.BLL.Mapper;
 using Catalog.BLL.Services;
 using Catalog.BLL.Services.Interfaces;
@@ -9,6 +10,13 @@ using Catalog.DAL.UOW;
 using Catalog.Domain.Entities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json")
+        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+        .Build()).CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +49,14 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+app.UseSerilogRequestLogging(options =>
+{
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RequestPath", httpContext.Request.Path);
+        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].ToString());
+    };
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
