@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Orders.DAL\Orders.DAL.csproj" />
-    <ProjectReference Include="..\..\OrdersDomain\Orders.Domain.csproj" />
+    <ProjectReference Include="..\Orders.Domain\Orders.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />

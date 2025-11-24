@@ -1,6 +1,7 @@
 ﻿using Orders.DAL.Repositories;
 using Orders.DAL.Repositories.Interfaces;
 using Npgsql;
+using JewelryStore.OrdersService.Orders.DAL.Repositories;
 
 namespace Orders.DAL.UOW
 {
