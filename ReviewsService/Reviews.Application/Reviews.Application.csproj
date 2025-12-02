@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Reviews.Domain\Reviews.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="13.1.0" />
+    <PackageReference Include="FluentValidation" Version="11.9.0" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Interfaces\" />
+    <None Remove="Services\" />
+    <None Remove="Commands\" />
+    <None Remove="Commands\RatingCommands\" />
+    <None Remove="Commands\RatingCommands\DeleteRating\" />
+    <None Remove="Commands\RatingCommands\CreateRating\" />
+    <None Remove="Commands\RatingCommands\UpdateRating\" />
+    <None Remove="Commands\ReviewCommands\" />
+    <None Remove="Commands\ReviewCommands\CreateReview\" />
+    <None Remove="Commands\ReviewCommands\UpdateReview\" />
+    <None Remove="Commands\ReviewCommands\DeleteReview\" />
+    <None Remove="Commands\DiscussionCommand\" />
+    <None Remove="Queries\" />
+    <None Remove="Queries\RatingQueries\" />
+    <None Remove="Queries\ReviewQueries\" />
+    <None Remove="Queries\DiscussinQueries\" />
+    <None Remove="Behaviors\" />
+    <None Remove="Validators\" />
+    <None Remove="Validators\RatingValidators\" />
+    <None Remove="Validators\ReviewValidators\" />
+    <None Remove="Validators\DiscussionValidators\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Services\" />
+    <Folder Include="Commands\" />
+    <Folder Include="Commands\RatingCommands\" />
+    <Folder Include="Commands\RatingCommands\DeleteRating\" />
+    <Folder Include="Commands\RatingCommands\CreateRating\" />
+    <Folder Include="Commands\RatingCommands\UpdateRating\" />
+    <Folder Include="Commands\ReviewCommands\" />
+    <Folder Include="Commands\ReviewCommands\CreateReview\" />
+    <Folder Include="Commands\ReviewCommands\UpdateReview\" />
+    <Folder Include="Commands\ReviewCommands\DeleteReview\" />
+    <Folder Include="Commands\DiscussionCommand\" />
+    <Folder Include="Queries\" />
+    <Folder Include="Queries\RatingQueries\" />
+    <Folder Include="Queries\ReviewQueries\" />
+    <Folder Include="Queries\DiscussinQueries\" />
+    <Folder Include="Behaviors\" />
+    <Folder Include="Validators\" />
+    <Folder Include="Validators\RatingValidators\" />
+    <Folder Include="Validators\ReviewValidators\" />
+    <Folder Include="Validators\DiscussionValidators\" />
+  </ItemGroup>
+</Project>
