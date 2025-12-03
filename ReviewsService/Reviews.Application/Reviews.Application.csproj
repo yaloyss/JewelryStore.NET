@@ -38,6 +38,11 @@
     <None Remove="Validators\RatingValidators\" />
     <None Remove="Validators\ReviewValidators\" />
     <None Remove="Validators\DiscussionValidators\" />
+    <None Remove="DTOs\" />
+    <None Remove="DTOs\ReviewDTOs\" />
+    <None Remove="DTOs\RatingDTO\" />
+    <None Remove="DTOs\DiscussionDTO\" />
+    <None Remove="DTOs\MessageDTO\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />
@@ -61,5 +66,10 @@
     <Folder Include="Validators\RatingValidators\" />
     <Folder Include="Validators\ReviewValidators\" />
     <Folder Include="Validators\DiscussionValidators\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="DTOs\ReviewDTOs\" />
+    <Folder Include="DTOs\RatingDTO\" />
+    <Folder Include="DTOs\DiscussionDTO\" />
+    <Folder Include="DTOs\MessageDTO\" />
   </ItemGroup>
 </Project>
