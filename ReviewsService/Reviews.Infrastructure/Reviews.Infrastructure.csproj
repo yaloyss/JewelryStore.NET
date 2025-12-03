@@ -24,6 +24,7 @@
     <None Remove="Mongo\Repositories\" />
     <None Remove="Mongo\UOW\" />
     <None Remove="Mongo\Mapping\" />
+    <None Remove="Mongo\Seeder\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Mongo\" />
@@ -32,5 +33,6 @@
     <Folder Include="Mongo\Repositories\" />
     <Folder Include="Mongo\UOW\" />
     <Folder Include="Mongo\Mapping\" />
+    <Folder Include="Mongo\Seeder\" />
   </ItemGroup>
 </Project>
