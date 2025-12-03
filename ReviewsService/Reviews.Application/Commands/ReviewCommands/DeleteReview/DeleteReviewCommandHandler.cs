@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Reviews.Application.Interfaces;
+using Reviews.Domain.Interfaces.Services;
 
 namespace Reviews.Application.Commands.ReviewCommands.DeleteReview
 {

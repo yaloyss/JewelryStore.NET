@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using Reviews.Application.Interfaces;
 using Reviews.Domain.Entities;
+using Reviews.Domain.Interfaces.Services;
 
 namespace Reviews.Application.Commands.ReviewCommands.CreateReview
 {
