@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Catalog.API.Middleware;
 using Catalog.BLL.Mapper;
 using Catalog.BLL.Services;
@@ -18,58 +19,70 @@ Log.Logger = new LoggerConfiguration()
         .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
         .Build()).CreateLogger();
 
-var builder = WebApplication.CreateBuilder(args);
-
-
-builder.Services.AddDbContext<CatalogDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("CatalogDb")));
-
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IMetalService, MetalService>();
-builder.Services.AddScoped<IStoneService, StoneService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-builder.Services.AddScoped<ISorting<Product>, Sorting<Product>>();
-
-builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDTOValidator>();
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+try
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    Log.Information("Starting Catalog API...");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog();
+
+    builder.Services.AddDbContext<CatalogDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("CatalogDb")));
+
+    builder.Services.AddScoped<ICategoryService, CategoryService>();
+    builder.Services.AddScoped<IMetalService, MetalService>();
+    builder.Services.AddScoped<IStoneService, StoneService>();
+    builder.Services.AddScoped<IProductService, ProductService>();
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+    builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+    builder.Services.AddScoped<ISorting<Product>, Sorting<Product>>();
+
+    builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDTOValidator>();
+
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(c =>
     {
-        Title = "Jewelry shop Catalog API",
-        Version = "v1",
-        Description = "API for jewelry shop catalog management"
+        c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+        {
+            Title = "Jewelry Shop Catalog API",
+            Version = "v1",
+            Description = "API for Jewelry Shop Catalog Management"
+        });
     });
-});
 
-var app = builder.Build();
+    var app = builder.Build();
 
-app.UseSerilogRequestLogging(options =>
-{
-    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    app.UseSerilogRequestLogging(options =>
     {
-        diagnosticContext.Set("RequestPath", httpContext.Request.Path);
-        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].ToString());
-    };
-});
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("RequestPath", httpContext.Request.Path);
+            diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].ToString());
+        };
+    });
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseMiddleware<ExceptionHandler>();
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    Log.Information("Catalog API started successfully");
+    app.Run();
 }
-
-app.UseMiddleware<ExceptionHandler>();
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
