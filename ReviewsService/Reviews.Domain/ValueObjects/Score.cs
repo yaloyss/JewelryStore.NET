@@ -9,7 +9,8 @@ namespace Reviews.Domain.ValueObjects
         [BsonElement("value")]
         public int Value { get; private set; }
 
-        private Score() { }
+        [BsonConstructor]
+        public Score() { }
 
         public Score(int value)
         {

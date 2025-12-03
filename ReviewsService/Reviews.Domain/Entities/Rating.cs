@@ -12,7 +12,8 @@ public class Rating : BaseEntity
     [BsonElement("score")]
     public Score Score { get; private set; }
 
-    private Rating() : base() { }
+    [BsonConstructor]
+    public Rating() : base() { }
 
     public Rating(int score) : base()
     {

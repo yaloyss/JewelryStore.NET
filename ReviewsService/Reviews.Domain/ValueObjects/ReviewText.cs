@@ -12,7 +12,8 @@ namespace Reviews.Domain.ValueObjects
         [BsonElement("body")]
         public string Body { get; private set; }
 
-        private ReviewText() { }
+        [BsonConstructor]
+        public ReviewText() { }
 
         public ReviewText(string title, string body)
         {

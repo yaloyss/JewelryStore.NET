@@ -13,7 +13,8 @@ namespace Reviews.Domain.ValueObjects
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime CreatedAt { get; private set; }
 
-        private Message() { }
+        [BsonConstructor]
+        public Message() { }
 
         public Message(string text)
         {
