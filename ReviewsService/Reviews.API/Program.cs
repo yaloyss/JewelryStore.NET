@@ -31,13 +31,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IDiscussionService, DiscussionService>();
 
-//builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-//builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ExceptionHandlingBehavior<,>));
-//builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-//builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
 builder.Services.AddMediatR(cfg =>
 {
-    // Реєструємо всі Command/Query хендлери з твоєї Assembly
     cfg.RegisterServicesFromAssemblies(typeof(CreateReviewCommandHandler).Assembly);
 
     cfg.AddOpenBehavior(typeof(ExceptionHandlingBehavior<,>));
@@ -54,7 +49,7 @@ var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline.s
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

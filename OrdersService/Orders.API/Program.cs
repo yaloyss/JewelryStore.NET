@@ -2,24 +2,16 @@
 using Orders.BLL.Mapper;
 using Orders.BLL.Services;
 using Orders.BLL.Services.Interfaces;
-using Orders.DAL.Repositories;
-using Orders.DAL.Repositories.Interfaces;
 using Orders.DAL.UOW;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-//builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
-//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-//builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-//builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUnitOfWork>(sp =>
 {
     var connectionstring = builder.Configuration.GetConnectionString("OrdersDB");
     return new UnitOfWork(connectionstring);
 });
 
-//builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IOrderItemService, OrderItemService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
