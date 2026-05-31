@@ -1,0 +1,17 @@
+@Gateway_HostAddress = http://localhost:5010
+
+### Catalog - products
+GET {{Gateway_HostAddress}}/api/Products?pageNumber=1&pageSize=10
+Accept: application/json
+
+### Catalog - product by id
+GET {{Gateway_HostAddress}}/api/Products/1
+Accept: application/json
+
+### Orders - all orders
+GET {{Gateway_HostAddress}}/api/Order
+Accept: application/json
+
+### Reviews - product reviews
+GET {{Gateway_HostAddress}}/api/Reviews/product/1?pageNumber=1&pageSize=10
+Accept: application/json
